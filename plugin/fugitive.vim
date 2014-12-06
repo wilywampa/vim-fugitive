@@ -2848,10 +2848,11 @@ endfunction
 " Section: Statusline
 
 function! s:repo_head_ref() dict abort
-  if !filereadable(self.dir('HEAD'))
+  try
+    return readfile(self.dir('HEAD'))[0]
+  catch
     return ''
-  endif
-  return readfile(self.dir('HEAD'))[0]
+  endtry
 endfunction
 
 call s:add_methods('repo',['head_ref'])
