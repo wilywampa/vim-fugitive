@@ -1616,11 +1616,12 @@ endfunction
 
 function! s:diff_modifier(count) abort
   let fdc = matchstr(&diffopt, 'foldcolumn:\zs\d\+')
+  let s:limit = (&tw ? &tw : 80) + (empty(fdc) ? 2 : fdc)
   if &diffopt =~# 'horizontal' && &diffopt !~# 'vertical'
     return 'keepalt '
   elseif &diffopt =~# 'vertical'
     return 'keepalt vert '
-  elseif winwidth(0) <= a:count * ((&tw ? &tw : 80) + (empty(fdc) ? 2 : fdc))
+  elseif winwidth(0) <= a:count * s:limit
     return 'keepalt '
   else
     return 'keepalt vert '
@@ -1703,6 +1704,9 @@ endfunction
 call s:add_methods('buffer',['compare_age'])
 
 function! s:Diff(vert,...) abort
+  if stridx(s:diff_modifier(2), 'vert') == -1 && &columns > 2 * s:limit
+    tab split
+  endif
   let vert = empty(a:vert) ? s:diff_modifier(2) : a:vert
   if exists(':DiffGitCached')
     return 'DiffGitCached'
