@@ -1290,16 +1290,15 @@ function! s:Log(cmd, line1, line2, ...) abort
     let &grepprg = escape(call(s:repo().git_command,cmd,s:repo()),'%#')
     let &grepformat = '%Cdiff %.%#,%C--- %.%#,%C+++ %.%#,%Z@@ -%\d%\+\,%\d%\+ +%l\,%\d%\+ @@,%-G-%.%#,%-G+%.%#,%-G %.%#,%A%f::%m,%-G%.%#'
     grep!
-    if a:cmd[-1:] != '!'
-      copen
-      wincmd p
-      cfirst
-    endif
   finally
     let &grepformat = grepformat
     let &grepprg = grepprg
     execute cd.'`=dir`'
   endtry
+  if a:cmd[-1:] != '!' && &filetype ==# 'qf'
+    wincmd p
+    silent! cfirst
+  endif
 endfunction
 
 " Section: Gedit, Gpedit, Gsplit, Gvsplit, Gtabedit, Gread
