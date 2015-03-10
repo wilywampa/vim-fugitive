@@ -226,6 +226,10 @@ augroup fugitive
   autocmd VimEnter * if expand('<amatch>')==''|call fugitive#detect(getcwd())|endif
   autocmd CmdWinEnter * call fugitive#detect(expand('#:p'))
   autocmd BufWinLeave * execute getwinvar(+bufwinnr(+expand('<abuf>')), 'fugitive_leave')
+  autocmd FileType qf
+      \ if getline(1)[:10] == 'fugitive://' |
+      \   setlocal syntax=fugitive-qf conceallevel=2 concealcursor=ni |
+      \ endif
 augroup END
 
 " Section: Repository
