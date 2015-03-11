@@ -8,8 +8,8 @@ if exists("b:current_syntax") && b:current_syntax != "qf"
   finish
 endif
 
-syn match       qfGitHash       "[[:alnum:]]\{40}" contained
-syn match       fugitiveURL     "^fugitive://.\{-}/\ze[[:alnum:]]\{40}" contained conceal
+syn match       qfGitHash       "\x\{40}" contained
+syn match       fugitiveURL     "^fugitive://.\{-}/\ze\x\{40}" contained conceal
 syn match	qfFileName	"^[^|]*" nextgroup=qfSeparator contains=fugitiveURL,qfGitHash
 syn match	qfSeparator	"|" nextgroup=qfLineNr contained
 syn match	qfLineNr	"[^|]*" contained contains=qfError
