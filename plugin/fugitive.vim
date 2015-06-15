@@ -2919,6 +2919,11 @@ function! fugitive#head(...) abort
   return s:repo().head(a:0 ? a:1 : 0)
 endfunction
 
+augroup fugitive_statusline
+  autocmd!
+  autocmd User Flags call Hoist('buffer', function('fugitive#statusline'))
+augroup END
+
 " Section: Folding
 
 function! fugitive#foldtext() abort
