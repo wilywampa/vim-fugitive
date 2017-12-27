@@ -241,7 +241,7 @@ augroup fugitive
   autocmd!
   autocmd BufNewFile,BufReadPost * call fugitive#detect(expand('%:p'))
   autocmd FileType           netrw call fugitive#detect(expand('%:p'))
-  autocmd User NERDTreeInit,NERDTreeNewRoot call fugitive#detect(b:NERDTreeRoot.path.str())
+  autocmd User NERDTreeInit,NERDTreeNewRoot call fugitive#detect(b:NERDTree.root.path.str())
   autocmd VimEnter * if expand('<amatch>')==''|call fugitive#detect(getcwd())|endif
   autocmd CmdWinEnter * call fugitive#detect(expand('#:p'))
   autocmd BufWinLeave * execute getwinvar(+bufwinnr(+expand('<abuf>')), 'fugitive_leave')
@@ -665,7 +665,9 @@ function! s:buffer_expand(rev) dict abort
   else
     let file = a:rev
   endif
-  return s:sub(s:sub(file,'\%$',self.path()),'\.\@<=/$','')
+  return s:sub(substitute(file,
+        \ '%$\|\\\([[:punct:]]\)','\=len(submatch(1)) ? submatch(1) : self.path()','g'),
+        \ '\.\@<=/$','')
 endfunction
 
 function! s:buffer_containing_commit() dict abort
@@ -2007,7 +2009,7 @@ function! s:Blame(bang,line1,line2,count,args) abort
       let cmd += ['--contents', '-']
     endif
     let cmd += ['--', s:buffer().path()]
-    let basecmd = escape(call(s:repo().git_command,cmd,s:repo()),'!')
+    let basecmd = escape(call(s:repo().git_command,cmd,s:repo()),'!%#')
     try
       let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd' : 'cd'
       if !s:repo().bare()
@@ -2759,6 +2761,8 @@ function! s:BufReadObject() abort
       endif
     endtry
 
+    return ''
+  catch /^fugitive: rev-parse/
     return ''
   catch /^fugitive:/
     return 'echoerr v:errmsg'
