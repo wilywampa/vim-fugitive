@@ -138,13 +138,17 @@ function! FugitiveHead(...) abort
   return fugitive#repo().head(a:0 ? a:1 : 0)
 endfunction
 
-function! FugitiveFilename(...) abort
+function! FugitivePath(...) abort
   let file = fnamemodify(a:0 ? a:1 : @%, ':p')
   if file =~? '^fugitive:'
-    return fugitive#Filename(file)
+    return fugitive#Path(file)
   else
     return file
   endif
+endfunction
+
+function! FugitiveReal(...) abort
+  return call('FugitivePath', a:000)
 endfunction
 
 augroup fugitive
@@ -152,9 +156,21 @@ augroup fugitive
 
   autocmd BufNewFile,BufReadPost * call FugitiveDetect(expand('%:p'))
   autocmd FileType           netrw call FugitiveDetect(fnamemodify(get(b:, 'netrw_curdir', @%), ':p'))
-  autocmd User NERDTreeInit,NERDTreeNewRoot call FugitiveDetect(b:NERDTree.root.path.str())
+  autocmd User NERDTreeInit,NERDTreeNewRoot
+        \ if exists('b:NERDTree.root.path.str') |
+        \   call FugitiveDetect(b:NERDTree.root.path.str()) |
+        \ endif
   autocmd VimEnter * if expand('<amatch>')==''|call FugitiveDetect(getcwd())|endif
   autocmd CmdWinEnter * call FugitiveDetect(expand('#:p'))
+
+  autocmd FileType git
+        \ if exists('b:git_dir') |
+        \  call fugitive#MapJumps() |
+        \ endif
+  autocmd FileType git,gitcommit,gitrebase
+        \ if exists('b:git_dir') |
+        \   call fugitive#MapCfile() |
+        \ endif
 
   autocmd BufReadCmd  index{,.lock}
         \ if FugitiveIsGitDir(expand('<amatch>:p:h')) |
